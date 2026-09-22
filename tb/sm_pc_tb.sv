@@ -419,7 +419,7 @@ module sm_pc_tb #(
         ->driver_done;
     end
 
-    initial begin : scorebaord
+    initial begin : scoreboard
         sm_pc_item data_item;
         sm_pc_item result_item;
         logic [$clog2(IMEM_DEPTH)-1:0] expected_pc_absolute;
@@ -477,85 +477,4 @@ module sm_pc_tb #(
         else $finish("Pass.");
 
     end
-    /*
-    // coverage
-    covergroup priorities with function sample();
-        res : coverpoint restart {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        adv : coverpoint advance {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        lreq : coverpoint load_req {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        pc_wrap : coverpoint (wrap_top == pc_local) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        all : cross res, adv, lreq, pc_wrap;
-    endgroup
-
-    covergroup pc_bounds @(posedge clk);
-        top_gt_bottom : coverpoint (wrap_top > wrap_bottom) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        top_eq_bottom : coverpoint (wrap_top == wrap_bottom) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        top_lt_bottom : coverpoint (wrap_top < wrap_bottom) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        top_max : coverpoint wrap_top {
-            bins max = {'1};
-        }
-
-        bottom_min : coverpoint wrap_bottom {
-            bins min = {'0};
-        }
-
-        pc_wrap : coverpoint (pc_local == wrap_top) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        pc_exhaust : coverpoint pc_local {
-            bins all[] = { [0:$] };
-        }
-    endgroup
-
-    covergroup load @(posedge clk iff load_req);
-        load_data : coverpoint load_data {
-            bins zero = {0};
-            bins max = {'1};
-        }
-
-        load_to_top : coverpoint (load_data == wrap_top) {
-            bins true = {1};
-            bins false = {0};
-        }
-        
-        load_to_bottom : coverpoint (load_data == wrap_bottom) {
-            bins true = {1};
-            bins false = {0};
-        }
-
-        load_to_self : coverpoint (load_data == pc_local) {
-            bins true = {1};
-            bins false = {0};
-        }
-    endgroup*/
 endmodule
