@@ -1,0 +1,29 @@
+# Questa work libraries
+work/
+*_lib/
+modelsim.ini
+
+# Simulation logs and dumps
+transcript
+transcript.*
+vsim.wlf
+*.wlf
+wlf*
+vsim_stacktrace.vstf
+*.vstf
+vish_stacktrace.vstf
+
+# Compile/optimize logs
+*.log
+vlog.log
+vopt.log
+
+# Coverage
+*.ucdb
+covhtml/
+coverage_report/
+
+# Editor/OS
+*.swp
+*~
+.DS_Store
