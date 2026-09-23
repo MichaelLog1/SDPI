@@ -67,10 +67,10 @@ module shift_reg_tb #(
     } model_rule_t;
 
     typedef struct {
-            logic [DATA_WIDTH-1:0] shift_data_out;
-            logic [DATA_WIDTH-1:0] unload_data;
-            logic [$clog2(DATA_WIDTH):0] count_out;
-            logic threshold_reached;
+        logic [DATA_WIDTH-1:0] shift_data_out;
+        logic [DATA_WIDTH-1:0] unload_data;
+        logic [$clog2(DATA_WIDTH):0] count_out;
+        logic threshold_reached;
     } outputs_t;
 
     class shift_transaction;
