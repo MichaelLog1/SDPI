@@ -1,0 +1,10 @@
+package sm_core_env_pkg;
+    `include "env/sm_config.svh"
+    `include "env/sm_obs.svh"
+    `include "env/sm_instruction.svh"
+    `include "env/sm_program.svh"
+    `include "env/sm_program_sequence.svh"
+    `include "env/sm_monitor.svh"
+    `include "env/sm_frame_driver.svh"
+    `include "env/sm_env.svh"
+endpackage

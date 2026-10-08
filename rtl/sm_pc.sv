@@ -1,6 +1,6 @@
 module sm_pc #(
-    int unsigned SM_WINDOW = 32,
-    int unsigned IMEM_DEPTH = 64
+    parameter int unsigned SM_WINDOW = 32,
+    parameter int unsigned IMEM_DEPTH = 64
 ) (
     input logic clk,
     input logic rst_n,
