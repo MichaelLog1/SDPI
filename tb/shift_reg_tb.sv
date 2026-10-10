@@ -434,8 +434,7 @@ module shift_reg_tb #(
                             end
 
                             for (int i = 0; i < item.shift_amt; i++) begin
-                                shift_r
-                                [DATA_WIDTH-item.shift_amt+i] = item.shift_data_in[i];
+                                shift_r[DATA_WIDTH-item.shift_amt+i] = item.shift_data_in[i];
                             end
                         end
                         if (count + item.shift_amt > DATA_WIDTH) count = DATA_WIDTH;

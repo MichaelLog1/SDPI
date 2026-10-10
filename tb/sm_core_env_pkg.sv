@@ -6,5 +6,10 @@ package sm_core_env_pkg;
     `include "env/sm_program_sequence.svh"
     `include "env/sm_monitor.svh"
     `include "env/sm_frame_driver.svh"
+    `include "env/sm_clkdiv_model.svh"
+    `include "env/sm_isr_model.svh"
+    `include "env/sm_osr_model.svh"
+    `include "env/sm_iss.svh"
+    `include "env/sm_scoreboard.svh"
     `include "env/sm_env.svh"
 endpackage

@@ -400,7 +400,6 @@ package sm_core_isa_pkg;
                 $display("%s %s %d ", opcode.name, operand.set.dst.name, operand.set.imm);
             end
         endcase
-
-
+        
     endfunction
 endpackage
