@@ -46,10 +46,10 @@ class sm_config;
 
     constraint c_clk_div {
         div_int dist {
-            1 :/ 50,
-            2 :/ 20,
-            3 :/ 20, 
-            4 :/ 10
+            // 1 :/ 50,
+            // 2 :/ 20,
+            // 3 :/ 20, 
+            4 :/ 100
         };
     }
 

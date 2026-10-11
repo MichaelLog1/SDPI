@@ -15,7 +15,12 @@ class sm_osr_model;
     endfunction
 
     function logic [DATA_WIDTH-1:0] get_shift_data_out(logic [$clog2(DATA_WIDTH):0] shift_amt, logic shiftdir);
-        return (shift_dir ? (shift_r >> (DATA_WIDTH - shift_amt)) : (shift_r & (((DATA_WIDTH)'(1)<<shift_amt) - 1)));
+        logic [DATA_WIDTH-1:0] temp_shift_r;
+        for (int i = 0; i < DATA_WIDTH; i++) begin
+            temp_shift_r[i] = shift_r[i];
+        end
+
+        return (shiftdir ? (temp_shift_r >> (DATA_WIDTH - shift_amt)) : (temp_shift_r & (((DATA_WIDTH)'(1)<<shift_amt) - 1)));
     endfunction
 
     function void reset();

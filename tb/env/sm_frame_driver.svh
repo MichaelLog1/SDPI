@@ -30,7 +30,7 @@ class sm_frame_driver;
         vif.driver_cb.pin_set_count <= prog.cfg.pin_set_count;
         vif.driver_cb.pin_in_base <= prog.cfg.pin_in_base;
         vif.driver_cb.pin_sideset_base <= prog.cfg.pin_sideset_base;
-        // indle values for control signals
+        // idle values for control signals
         vif.driver_cb.restart <= 1'b0;
         vif.driver_cb.uio_in <= '0;
         vif.driver_cb.tx_fifo_wr_en <= 1'b0;

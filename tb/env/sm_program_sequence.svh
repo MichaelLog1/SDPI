@@ -1,9 +1,9 @@
 virtual class sm_program_sequence;
-    pure virtual task body(mailbox #(sm_program) mb);
+    pure virtual task body(mailbox #(sm_program) driver_mailbox);
 endclass
 
 class smoke_seq extends sm_program_sequence;
-    task body(mailbox #(sm_program) mb);
+    task body(mailbox #(sm_program) driver_mailbox);
         sm_program item;
         item = new(5);
         // set config
@@ -49,6 +49,6 @@ class smoke_seq extends sm_program_sequence;
         item.instr[4].jmp_cond = JMP_ALWAYS;
         item.instr[4].jmp_offset = 0;
 
-        mb.put(item);
+        driver_mailbox.put(item);
     endtask
 endclass

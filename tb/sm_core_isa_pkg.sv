@@ -385,7 +385,7 @@ package sm_core_isa_pkg;
             end
 
             3'd4: begin // PUSH/PULL
-                $dsiplay("%s ", opcode.name);
+                $display("%s ", opcode.name);
             end
 
             3'd5: begin // MOV

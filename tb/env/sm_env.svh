@@ -7,6 +7,7 @@ class sm_env #(
 
     sm_frame_driver driver;
     sm_monitor monitor;
+    sm_scoreboard scoreboard;
 
     function new(virtual sm_core_if _vif);
         vif = _vif;
@@ -15,6 +16,7 @@ class sm_env #(
 
         driver = new(vif, frame_driver_mailbox);
         monitor = new(vif, scoreboard_mailbox);
+        scoreboard = new(scoreboard_mailbox);
     endfunction
 
     task generate_frames();
@@ -34,26 +36,24 @@ class sm_env #(
         frame_driver_mailbox.put(null);
     endtask
 
-    // TEMPORARY
-    task printer();
-        sm_obs item;
-        forever begin
-            scoreboard_mailbox.get(item);
-            $display("%s", item.to_string_short());
-        end
-    endtask
-
     task run();
         fork
             monitor.run();
+            scoreboard.run();
             generate_frames();
-            printer();
         join_none
 
         driver.run();
         do @(posedge vif.clk); while (scoreboard_mailbox.num() != 0);
         repeat (5) @(posedge vif.clk);
-        $display("Tests complete.");
-        $finish;
+        $display("\nPassed: %d\nFailed: %d\n", scoreboard.passed, scoreboard.failed);
+        if (scoreboard.failed > 0) begin
+            $fatal(1, "Fail.");
+        end else if (scoreboard.passed == 0 && scoreboard.failed == 0) begin
+            $fatal(1, "No checks performed.");
+        end else begin
+            $display("Pass.");
+        end
+        $finish(0);
     endtask
 endclass

@@ -11,8 +11,9 @@ build:
 		rtl/sm_decode.sv \
 		rtl/sm_pc.sv \
 		rtl/sm_core.sv \
-		tb/sm_core_tb.sv
+		tb/sm_core_tb.sv && \
+	vopt sm_core_tb -o sm_core_tb_opt
 
 run:
 	source /apps/reconfig/enable && \
-	vsim -c sm_core_tb -do "run -all; quit"
+	vsim -onfinish stop -c sm_core_tb -do "run -all; quit -code [expr {[coverage attribute -name TESTSTATUS -concise] >= 2}]"

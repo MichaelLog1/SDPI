@@ -15,7 +15,7 @@ module sm_core_tb #(
     parameter int unsigned DIV_FRAC_WIDTH = sm_core_if_pkg::DIV_FRAC_WIDTH,
     parameter int unsigned NUM_IRQ = sm_core_if_pkg::NUM_IRQ,
     parameter int unsigned FIFO_DEPTH = sm_core_if_pkg::FIFO_DEPTH,
-    parameter int unsigned NUM_FRAMES = 1
+    parameter int unsigned NUM_FRAMES = 10
 );
     
     logic clk = 0;
