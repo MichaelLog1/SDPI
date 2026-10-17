@@ -32,9 +32,6 @@ class sm_frame_driver;
         vif.driver_cb.pin_sideset_base <= prog.cfg.pin_sideset_base;
         // idle values for control signals
         vif.driver_cb.restart <= 1'b0;
-        vif.driver_cb.uio_in <= '0;
-        vif.driver_cb.tx_fifo_wr_en <= 1'b0;
-        vif.driver_cb.tx_fifo_wr_data <= '0;
         vif.driver_cb.tx_fifo_clear <= 1'b0;
         vif.driver_cb.rx_fifo_rd_en <= 1'b0;
         vif.driver_cb.rx_fifo_clear <= 1'b0;

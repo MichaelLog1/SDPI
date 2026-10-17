@@ -78,6 +78,11 @@ class sm_iss;
         clkdiv_model = new();
     endfunction
 
+    function logic get_advance(sm_obs item);
+        comb_t comb_signals = comb(item); 
+        return comb_signals.advance;
+    endfunction
+
     function bit is_valid();
         return valid;
     endfunction
