@@ -33,7 +33,6 @@ class sm_frame_driver;
         // idle values for control signals
         vif.driver_cb.restart <= 1'b0;
         vif.driver_cb.tx_fifo_clear <= 1'b0;
-        vif.driver_cb.rx_fifo_rd_en <= 1'b0;
         vif.driver_cb.rx_fifo_clear <= 1'b0;
 
         // reset

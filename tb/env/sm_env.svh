@@ -10,6 +10,7 @@ class sm_env #(
     sm_scoreboard scoreboard;
     sm_pin_agent pin_agent;
     sm_tx_agent tx_agent;
+    sm_rx_agent rx_agent;
 
     function new(virtual sm_core_if _vif);
         vif = _vif;
@@ -21,19 +22,24 @@ class sm_env #(
         scoreboard = new(scoreboard_mailbox);
         pin_agent = new(vif);
         tx_agent = new(vif);
+        rx_agent = new(vif);
     endfunction
 
     task generate_frames();
         sm_program_sequence seq;
-        smoke_seq s_seq;
-        pull_seq p_seq;
+        smoke_seq smoke;
+        pull_seq pull;
+        push_seq push;
 
-        s_seq = new();
-        p_seq = new();
+        smoke = new();
+        pull = new();
+        push = new();
 
         for (int i = 0; i < NUM_FRAMES; i++) begin
             randcase
-                100 : seq = p_seq;
+                34 : seq = smoke;
+                33 : seq = pull;
+                33 : seq = push;
             endcase
             seq.body(frame_driver_mailbox);
         end
@@ -49,6 +55,7 @@ class sm_env #(
             generate_frames();
             pin_agent.run();
             tx_agent.run();
+            rx_agent.run();
         join_none
 
         driver.run();

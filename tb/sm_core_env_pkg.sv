@@ -12,6 +12,7 @@ package sm_core_env_pkg;
     `include "env/sm_iss.svh"
     `include "env/sm_pin_agent.svh"
     `include "env/sm_tx_agent.svh"
+    `include "env/sm_rx_agent.svh"
     `include "env/sm_scoreboard.svh"
     `include "env/sm_env.svh"
 endpackage

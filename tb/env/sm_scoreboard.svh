@@ -4,6 +4,12 @@ class sm_scoreboard;
     int stalled = 0;
     int retired[IMEM_DEPTH];
     int fetched[IMEM_DEPTH];
+    // fifo flags for reporting (somethings wrong if these are set)
+    // could be agent implementation or DUT
+    int rx_underflow = 0;
+    int rx_overflow = 0;
+    int tx_underflow = 0;
+    int tx_overflow = 0;
     
     sm_iss model;
     mailbox #(sm_obs) scoreboard_mailbox;
@@ -29,6 +35,7 @@ class sm_scoreboard;
                 $display("%4d %7d %7d", i, fetched[i], retired[i]);
             end
         end
+        $display("rx_underflow: %0d, rx_overflow: %0d, tx_underflow: %0d, tx_overflow: %0d", rx_underflow, rx_overflow, tx_underflow, tx_overflow);
     endfunction
 
     task run();
@@ -119,6 +126,12 @@ class sm_scoreboard;
                         fetched[item.pc_absolute]++;
                     end        
                 end
+
+                // set ovf/unf flags
+                if (item.rx_fifo_underflow) rx_underflow = 1;
+                if (item.rx_fifo_overflow) rx_overflow = 1;
+                if (item.tx_fifo_underflow) tx_underflow = 1;
+                if (item.tx_fifo_overflow) tx_overflow = 1;
             end
         end
     endtask
