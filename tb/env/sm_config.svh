@@ -61,4 +61,12 @@ class sm_config;
     constraint c_div_frac {
         div_frac == 0;
     }
+
+    constraint c_autopush {
+        autopush == 1'b0;
+    }
+
+    constraint c_autopull {
+        autopull == 1'b0;
+    }
 endclass

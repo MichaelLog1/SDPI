@@ -468,7 +468,7 @@ class sm_iss;
         isr_autopush_fire = item.en & item.autopush & isr_model.get_threshold_reached(item.isr_threshold) & !item.full;
         isr_push_fire = advance & is_push & (~instr.operand.push_pull.iffull_ifempty | isr_model.get_threshold_reached(item.isr_threshold));
         isr_do_unload = isr_autopush_fire | isr_push_fire;
-        rx_en = isr_autopush_fire | isr_push_fire;
+        rx_en = (isr_autopush_fire | isr_push_fire) & !item.full;
         rx_data = isr_model.get_unload_data();
 
         isr_do_load = advance & (is_mov & (instr.operand.mov.dst == MOV_DST_ISR));

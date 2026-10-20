@@ -30,16 +30,19 @@ class sm_env #(
         smoke_seq smoke;
         pull_seq pull;
         push_seq push;
+        rand_seq random;
 
         smoke = new();
         pull = new();
         push = new();
+        random = new();
 
         for (int i = 0; i < NUM_FRAMES; i++) begin
             randcase
-                34 : seq = smoke;
-                33 : seq = pull;
-                33 : seq = push;
+                10 : seq = smoke;
+                10 : seq = pull;
+                10 : seq = push;
+                70 : seq = random;
             endcase
             seq.body(frame_driver_mailbox);
         end
@@ -62,8 +65,6 @@ class sm_env #(
         do @(posedge vif.clk); while (scoreboard_mailbox.num() != 0);
         repeat (5) @(posedge vif.clk);
         $display("\nPassed: %d\nFailed: %d\n", scoreboard.passed, scoreboard.failed);
-
-        scoreboard.print();
 
         if (scoreboard.failed > 0) begin
             $fatal(1, "Fail.");

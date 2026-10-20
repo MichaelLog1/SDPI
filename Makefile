@@ -16,4 +16,4 @@ build:
 
 run:
 	source /apps/reconfig/enable && \
-	vsim -onfinish stop -c sm_core_tb -do "run -all; quit -code [expr {[coverage attribute -name TESTSTATUS -concise] >= 2}]"
+	vsim -sv_seed random -onfinish stop -c sm_core_tb -do "run -all; quit -code [expr {[coverage attribute -name TESTSTATUS -concise] >= 2}]"

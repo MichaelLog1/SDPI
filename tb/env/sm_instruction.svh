@@ -95,6 +95,14 @@ class sm_instruction;
         out_crc == 1'b0;
     }
 
+    constraint c_irq {
+        opcode != IRQ;
+    }
+
+    constraint c_wait {
+        opcode != WAIT;
+    }
+
     // intentional NOP, defer for potential definition later
     constraint c_mov_src_exec {
         mov_src != MOV_SRC_EXEC;
@@ -148,5 +156,16 @@ class sm_instruction;
             SET:       return encode_set(set_dst, set_imm, delay, sideset_data, sideset_valid, cfg.sideset_count, cfg.sideset_opt);
             default: $fatal(1, "[SM_INSTRUCTION] invalid opcode: %s in encode()", opcode.name);
         endcase
+    endfunction
+
+    // this wont effect correctness of sim, but will effect debug prints, so just updating the values after randomization
+    // the sim and dut both just truncate the random value
+    function void post_randomize();
+        instruction_t instr = encode();
+        decoded_instruction_t decoded_instr = decode(instr, cfg.sideset_count, cfg.sideset_opt);
+
+        delay = decoded_instr.delay;
+        sideset_data = decoded_instr.sideset_data;
+        sideset_valid = decoded_instr.sideset_valid;
     endfunction
 endclass

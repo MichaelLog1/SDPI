@@ -72,6 +72,8 @@ class sm_frame_driver;
             frame_driver_mailbox.get(item);
             if (item == null) return;
 
+            //item.to_string();
+
             drive_frame(item);
         end
     endtask

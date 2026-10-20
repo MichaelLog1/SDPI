@@ -362,44 +362,168 @@ package sm_core_isa_pkg;
     endfunction
 
     // TODO: Fininsh this exhaustively.
-    function automatic void disassemble(input logic [15:0] data, input logic [4:0] sideset_count, input logic sideset_opt);
-        decoded_instruction_t decoded_inst = decode(data, sideset_count, sideset_opt);
-        opcode_t opcode = decoded_inst.instruction.opcode;
-        operand_t operand = decoded_inst.instruction.operand;
+    function automatic string disassemble(input logic [15:0] data, input logic [4:0] sideset_count, input logic sideset_opt);
+        decoded_instruction_t decoded_instr = decode(data, sideset_count, sideset_opt);
+        opcode_t opcode = decoded_instr.instruction.opcode;
+        operand_t operand = decoded_instr.instruction.operand;
+        string result = "";
+
+        int adjusted_count;
 
         case (opcode)
-            3'd0: begin // JMP
-                $display("%s %s %d ", opcode.name, operand.jmp.cond.name, operand.jmp.offset);
+            JMP: begin // JMP
+                case (operand.jmp.cond)
+                    JMP_ALWAYS:    result = $sformatf("JMP %0d", operand.jmp.offset);
+                    JMP_X_EQ_ZERO: result = $sformatf("JMP !X, %0d", operand.jmp.offset);
+                    JMP_X_NE_ZERO: result = $sformatf("JMP X--, %0d", operand.jmp.offset);
+                    JMP_Y_EQ_ZERO: result = $sformatf("JMP !Y, %0d", operand.jmp.offset);
+                    JMP_Y_NE_ZERO: result = $sformatf("JMP Y--, %0d", operand.jmp.offset);
+                    JMP_X_NE_Y:    result = $sformatf("JMP X!=Y, %0d", operand.jmp.offset);
+                    JMP_PIN:       result = $sformatf("JMP PIN, %0d", operand.jmp.offset);
+                    JMP_OSR:       result = $sformatf("JMP !OSRE, %0d", operand.jmp.offset);
+                endcase
             end
 
-            3'd1: begin // WAIT
-                $display("%s %s %d ", opcode.name, operand.wt.src.name, operand.wt.index);
+            WAIT: begin // WAIT
+                case (operand.wt.src)
+                    WAIT_PIN_ABS: result = $sformatf("WAIT %0d GPIO, %0d", operand.wt.pol, operand.wt.index[2:0]);
+                    WAIT_PIN_MAP: result = $sformatf("WAIT %0d PIN, %0d", operand.wt.pol, operand.wt.index[2:0]);
+                    WAIT_IRQ:     result = $sformatf("WAIT %0d IRQ, %0d", operand.wt.pol, operand.wt.index[2:0]);
+                    WAIT_EDGE:    result = $sformatf("WAIT %0d EDGE, %0d", operand.wt.pol, operand.wt.index[2:0]);
+                endcase
             end
 
-            3'd2: begin // IN
-                $display("%s %s %d ", opcode.name, operand.in.src.name, operand.in.count);
+            IN: begin // IN
+                adjusted_count = (operand.in.count == 0) ? 16 : operand.in.count;
+                case (operand.in.src)
+                    IN_PINS:    result = $sformatf("IN PINS, %0d", adjusted_count);
+                    IN_X:       result = $sformatf("IN X, %0d", adjusted_count);
+                    IN_Y:       result = $sformatf("IN Y, %0d", adjusted_count);
+                    IN_NULL:    result = $sformatf("IN NULL, %0d", adjusted_count);
+                    IN_ISR:     result = $sformatf("IN ISR, %0d", adjusted_count);
+                    IN_OSR:     result = $sformatf("IN OSR, %0d", adjusted_count);
+                    IN_CAPTURE: result = $sformatf("IN CAPTURE, %0d", adjusted_count); // unimplemented
+                    IN_CRC:     result = $sformatf("IN CRC, %0d", adjusted_count); // unimplemented
+                endcase
+
+                if (operand.in.crc_en) begin
+                    result = $sformatf("%s, crc", result);
+                end
             end
 
-            3'd3: begin // OUT
-                $display("%s %s %d ", opcode.name, operand.out.dst.name, operand.out.count);
+            OUT: begin // OUT
+                adjusted_count = (operand.out.count == 0) ? 16 : operand.out.count;
+                case (operand.out.dst)
+                    OUT_PINS:    result = $sformatf("OUT PINS, %0d", adjusted_count);
+                    OUT_X:       result = $sformatf("OUT X, %0d", adjusted_count);
+                    OUT_Y:       result = $sformatf("OUT Y, %0d", adjusted_count);
+                    OUT_NULL:    result = $sformatf("OUT NULL, %0d", adjusted_count);
+                    OUT_PINDIRS: result = $sformatf("OUT PINDIRS, %0d", adjusted_count);
+                    OUT_PC:      result = $sformatf("OUT PC, %0d", adjusted_count);
+                    OUT_ISR:     result = $sformatf("OUT ISR, %0d", adjusted_count);
+                    OUT_EXEC:    result = $sformatf("OUT EXEC, %0d", adjusted_count);
+                endcase
+
+                if (operand.out.crc_en) begin
+                    result = $sformatf("%s, crc", result);
+                end
             end
 
-            3'd4: begin // PUSH/PULL
-                $display("%s ", opcode.name);
+            PUSH_PULL: begin // PUSH/PULL
+                if (operand.push_pull.push_pull) begin // PULL
+                    result = $sformatf("PULL");
+                    if (operand.push_pull.iffull_ifempty) begin
+                        result = $sformatf("%s IFEMPTY", result);
+                    end
+
+                    if (!operand.push_pull.block) begin
+                        result = $sformatf("%s NOBLOCK", result);
+                    end
+                end else begin // PUSH
+                    result = $sformatf("PUSH");
+                    if (operand.push_pull.iffull_ifempty) begin
+                        result = $sformatf("%s IFFULL", result);
+                    end
+
+                    if (!operand.push_pull.block) begin
+                        result = $sformatf("%s NOBLOCK", result);
+                    end
+                end
             end
 
-            3'd5: begin // MOV
-                $display("%s %s %s ", opcode.name, operand.mov.op.name, operand.mov.dst.name);
+            MOV: begin // MOV
+                case (operand.mov.dst)
+                    MOV_DST_PINS: result = $sformatf("MOV PINS,");
+                    MOV_DST_X:    result = $sformatf("MOV X,");
+                    MOV_DST_Y:    result = $sformatf("MOV Y,");
+                    MOV_DST_NULL: result = $sformatf("MOV NULL,"); // meaningless
+                    MOV_DST_EXEC: result = $sformatf("MOV EXEC,");
+                    MOV_DST_PC:   result = $sformatf("MOV PC,");
+                    MOV_DST_ISR:  result = $sformatf("MOV ISR,");
+                    MOV_DST_OSR:  result = $sformatf("MOV OSR,");
+                endcase
+
+                case (operand.mov.op)
+                    MOV_OP_NONE:     result = $sformatf("%s ", result);
+                    MOV_OP_INVERT:   result = $sformatf("%s ~", result);
+                    MOV_OP_REVERSE:  result = $sformatf("%s ::", result);
+                    MOV_OP_RESERVED: result = $sformatf("%s ==", result);
+                endcase
+
+                case (operand.mov.src)
+                    MOV_SRC_PINS: result = $sformatf("%sPINS", result);
+                    MOV_SRC_X:    result = $sformatf("%sX", result);
+                    MOV_SRC_Y:    result = $sformatf("%sY", result);
+                    MOV_SRC_NULL: result = $sformatf("%sNULL", result);
+                    MOV_SRC_EXEC: result = $sformatf("%sEXEC", result);
+                    MOV_SRC_PC:   result = $sformatf("%sPC", result);
+                    MOV_SRC_ISR:  result = $sformatf("%sISR", result);
+                    MOV_SRC_OSR:  result = $sformatf("%sOSR", result);
+                endcase
             end
 
-            3'd6: begin // IRQ
-                $display("%s ", opcode.name);
+            IRQ: begin // IRQ
+                result = $sformatf("IRQ");
+
+                if (operand.irq.clr) begin
+                    result = $sformatf("%s CLEAR", result);
+                end
+
+                if (operand.irq.wt) begin
+                    result = $sformatf("%s WAIT", result);
+                end
+
+                result = $sformatf("%s %0d", result, operand.irq.index);
+
+                // overwrite if nop
+                if (operand.irq.clr && operand.irq.wt) begin
+                    result = $sformatf("IRQ NOP %0d", operand.irq.index);
+                end
             end
 
-            3'd7: begin // SET
-                $display("%s %s %d ", opcode.name, operand.set.dst.name, operand.set.imm);
+            SET: begin // SET
+                case (operand.set.dst)
+                    SET_PINS:    result = $sformatf("SET PINS, %0d", operand.set.imm);
+                    SET_X:       result = $sformatf("SET X, %0d", operand.set.imm);
+                    SET_Y:       result = $sformatf("SET Y, %0d", operand.set.imm);
+                    SET_NOP3:    result = $sformatf("SET NOP3, %0d", operand.set.imm);
+                    SET_PINDIRS: result = $sformatf("SET PINDIRS, %0d", operand.set.imm);
+                    SET_NOP5:    result = $sformatf("SET NOP5, %0d", operand.set.imm);
+                    SET_NOP6:    result = $sformatf("SET NOP6, %0d", operand.set.imm);
+                    SET_NOP7:    result = $sformatf("SET NOP7, %0d", operand.set.imm);
+                endcase
             end
         endcase
-        
+
+        // apply delay and sideset_data
+        if ((!sideset_opt && sideset_count > 0) || (sideset_opt && decoded_instr.sideset_valid)) begin
+            result = $sformatf("%s side %0d", result, decoded_instr.sideset_data);
+        end
+
+        if (decoded_instr.delay > 0) begin
+            result = $sformatf("%s [%0d]", result, decoded_instr.delay);
+        end
+
+        return result;
     endfunction
 endpackage

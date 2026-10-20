@@ -748,7 +748,7 @@ module sm_core #(
     assign isr_autopush_fire = en & autopush & isr_threshold_reached & !full;
     assign isr_push_fire = advance & is_push & (~p_iffull | isr_threshold_reached);
     assign isr_do_unload = isr_autopush_fire | isr_push_fire;
-    assign rx_en = isr_autopush_fire | isr_push_fire;
+    assign rx_en = (isr_autopush_fire | isr_push_fire) & !full;
     assign rx_data = isr_unload_data;
 
     assign isr_do_load = advance & (is_mov & (mov_dst == 3'd6));

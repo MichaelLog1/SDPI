@@ -4,6 +4,7 @@ class sm_scoreboard;
     int stalled = 0;
     int retired[IMEM_DEPTH];
     int fetched[IMEM_DEPTH];
+    logic [INSTRUCTION_WIDTH-1:0] frame_words[IMEM_DEPTH];
     // fifo flags for reporting (somethings wrong if these are set)
     // could be agent implementation or DUT
     int rx_underflow = 0;
@@ -20,11 +21,12 @@ class sm_scoreboard;
         for (int i = 0; i < IMEM_DEPTH; i++) begin
             retired[i] = 0;
             fetched[i] = 0;
+            frame_words[i] = '0;
         end
     endfunction
 
-    function void print();
-        $display("%4s %7s %7s", "ADDR", "FETCHED", "RETIRED");
+    function void print(logic [$clog2(6)-1:0] frame_sideset_count, logic frame_sideset_opt);
+        $display("%4s %7s %7s %30s", "ADDR", "FETCHED", "RETIRED", "INSTRUCTION");
         for (int i = 0; i < IMEM_DEPTH; i++) begin
             if (fetched[i] > 0) begin
                 if (retired[i] == 0) begin
@@ -32,10 +34,9 @@ class sm_scoreboard;
                                  // this could be a tb issue (tx agent somehow causing
                                  // pull to stall) or a dut issue
                 end
-                $display("%4d %7d %7d", i, fetched[i], retired[i]);
+                $display("%4d %7d %7d %30s", i, fetched[i], retired[i], disassemble(frame_words[i], frame_sideset_count, frame_sideset_opt));
             end
         end
-        $display("rx_underflow: %0d, rx_overflow: %0d, tx_underflow: %0d, tx_overflow: %0d", rx_underflow, rx_overflow, tx_underflow, tx_overflow);
     endfunction
 
     task run();
@@ -43,6 +44,10 @@ class sm_scoreboard;
         sm_iss::sm_model_predictions_t prediction;
         bit valid;
         logic advance;
+        logic prev_en = 1;
+
+        logic [$clog2(6)-1:0] frame_sideset_count;
+        logic frame_sideset_opt;
 
         forever begin
             valid = model.is_valid();
@@ -50,6 +55,12 @@ class sm_scoreboard;
             prediction = model.predict(item);
             advance = model.get_advance(item);
             model.step(item);
+
+            if (!prev_en && item.en) begin
+                // we can latch any important info here
+                frame_sideset_count = item.sideset_count;
+                frame_sideset_opt = item.sideset_opt;
+            end
 
             if (valid) begin
                 // check all outputs
@@ -119,20 +130,47 @@ class sm_scoreboard;
 
                 // update instruction retirement data structure
                 if (item.rst_n) begin
-                    if (advance) begin
+                    if (advance && item.en) begin
                         retired[item.pc_absolute]++;
                     end
                     if (item.en) begin
                         fetched[item.pc_absolute]++;
+                        frame_words[item.pc_absolute] = item.instruction;
                     end        
                 end
 
                 // set ovf/unf flags
-                if (item.rx_fifo_underflow) rx_underflow = 1;
-                if (item.rx_fifo_overflow) rx_overflow = 1;
-                if (item.tx_fifo_underflow) tx_underflow = 1;
-                if (item.tx_fifo_overflow) tx_overflow = 1;
+                if (item.rx_fifo_underflow) begin
+                    rx_underflow = 1;
+                    $error("rx_underflow");
+                end
+                
+                if (item.rx_fifo_overflow) begin
+                    rx_overflow = 1;
+                    $error("rx_overflow");
+                end
+
+                if (item.tx_fifo_underflow) begin
+                     tx_underflow = 1;
+                     $error("tx_underflow");
+                end
+
+                if (item.tx_fifo_overflow) begin
+                    tx_overflow = 1;
+                    $error("tx_overflow");
+                end
             end
+
+            // frame end detector
+            if (prev_en && !item.en) begin
+                print(frame_sideset_count, frame_sideset_opt);
+                for (int i = 0; i < IMEM_DEPTH; i++) begin
+                    retired[i] = 0;
+                    fetched[i] = 0;
+                    frame_words[i] = '0;
+                end
+            end
+            prev_en = item.en;
         end
     endtask
 endclass
